@@ -1,52 +1,105 @@
 const { response,request } = require('express');
+const bcrypt = require('bcryptjs');
 
+const Usuario = require('../models/usuario');
 
-const usuariosGet = (req, res) => {
+/*const usuariosGet = (req, res) => {
     //Porbar en postman http://localhost:8080/api/usuarios?nombre=Abel&access=true
-    const {nombre = 'Sin nombre', page = 1, access = 'false'} = req.query;
+    const body = req.body;
+    const usuario = new Usuario(body); //Enviando al modelo
+
+    //usuario.save();
     res.json({
         "ok" : true,
         "msje" : "Hola Abel separado",
-        nombre,
-        page,
-        access
+        usuario
+    });
+}*/
+const usuariosGet = async(req,res) =>{
+
+    const {limite = 5 , desde = 0} = req.query;
+    //Inicio cod, bloqueante
+    /*const usuarios = await Usuario.find({ estado : true }) //Buscando usuarios con estado igual a true
+        .skip(Number(desde))
+        .limit(Number(limite))
+    ;*/
+
+    //const total = await Usuario.countDocuments({ estado : true });
+    //Fin cod bloqueante, significa que ambos van por separado no se ejecutan al mismo tiempo por lo tanto el tiempo total de espera es la suma de ambos.
+    //Para contrarrestar esto usaremos
+    const [ total,usuarios ] = await Promise.all([
+        Usuario.countDocuments({ estado : true }),
+        Usuario.find({ estado : true })
+        .skip(Number(desde))
+        .limit(Number(limite))
+    ]);
+    res.json({
+        total,
+        usuarios
     });
 }
 
-const usuariosPut = (req, res) => {
+const usuariosPut = async(req, res) => {
     const id = req.params.id;
+    const { _id,password, google,correo, ...resto } = req.body; //Nunca procesar el _id
+    //Validad ID en bd (Middleware)
+    if(password){
+        const salt = bcrypt.genSaltSync();
+        resto.password = bcrypt.hashSync( password,salt );
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(id, resto);
+
+
     res.json({
         "ok" : true,
-        "msje" : "put Abel controlador",
+        "msje" : "Actualizado con éxito.",
         id
     });
 }
 
-const usuariosPost = (req, res) => {
+const usuariosPost = async (req, res) => {
 
-    const { nombre ,edad } = req.body;
+    const { nombre, correo, password, rol } = req.body;
+    const usuario = new Usuario({
+        nombre,
+        correo,
+        password,
+        rol 
+    });
+    
+    //encriptar la contraseña - con bcryptjs
+    const salt = bcrypt.genSaltSync();
+    usuario.password = bcrypt.hashSync( password,salt );
+    
+    //guardar en DB
 
-
+    await usuario.save();
 
     res.json({
         "ok" : true,
         "msje" : "post Abel controlador ",
-        nombre,
-        edad
+        usuario,
     });
 }
 
-const usuariosDelete = (req, res) => {
+const usuariosDelete = async(req, res) => {
+    const { id } = req.params;
+    //Borando físicamente
+    //const usuario = await Usuario.findByIdAndDelete(id);
+    const usuario = await Usuario.findByIdAndUpdate(id,{estado : false});
     res.json({
         "ok" : true,
-        "msje" : "delete Abel - controlador "
+        "msje" : "delete Abel - controlador ",
+        "msje_2" : "Usuario eliminado",
+        usuario
     });
 }
 
 const usuariosPath = (req, res) => {
     res.json({
         "ok" : true,
-        "msje" : "patch Abel - controlador "
+        "msje" : "patch Abel - controlador",
     });
 }
 
