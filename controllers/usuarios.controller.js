@@ -85,14 +85,19 @@ const usuariosPost = async (req, res) => {
 
 const usuariosDelete = async(req, res) => {
     const { id } = req.params;
+    const uid = req.uid;
     //Borando físicamente
     //const usuario = await Usuario.findByIdAndDelete(id);
     const usuario = await Usuario.findByIdAndUpdate(id,{estado : false});
+    //TODO: OBTENER EL USUARIO AUTENTICA
+    const usuarioAuth = req.usuarioAuth;
+    //console.log(uid);
     res.json({
         "ok" : true,
         "msje" : "delete Abel - controlador ",
         "msje_2" : "Usuario eliminado",
-        usuario
+        usuario, //TODO IMPRIMIR USUARIO AITENTICADO
+        usuarioAuth, //TODO IMP
     });
 }
 

@@ -4,9 +4,20 @@ const { check } = require('express-validator');
 
 const router = Router();
 
+/**
+ * *LLAMADO DE MIDDLEWARES -
+ */
+// const { validarCampos } = require('../middlewares/validar-campos');
+// const { validarJWT } = require('../middlewares/validar-jwt');
+// const { esAdminRol, verificaRoles } = require('../middlewares/validar-roles');
+/**
+ * *LLAMADO DE MIDDLEWARES - REDUCIDO
+ */
+const {validarCampos,validarJWT,esAdminRol,verificaRoles} = require('../middlewares/');
+
 const { usuariosGet, usuariosPut, usuariosPost, usuariosDelete, usuariosPath } = require('../controllers/usuarios.controller');
 const { verificaRol, verificarCorreo, existeUsuarioByID } = require('../helpers/db_validators');
-const { validarCampos } = require('../middlewares/validar-campos');
+
 
 
 router.get('/',usuariosGet);
@@ -29,6 +40,9 @@ router.post('/',[
 ],usuariosPost); //enviando middleware en especifico
 
 router.delete('/:id',[
+    validarJWT,
+    //esAdminRol,
+    verificaRoles('ROL_ADMIN','OTRO_ROL'),//*MIDDLEWARE MÁS FLEXIBLE - O SEA QUE LOS TIPOS DE ROL QUE INGRESEMOS SEAN VÁLIDOS
     check('id','Su id no es válido.').isMongoId(),
     check('id').custom(existeUsuarioByID),
     validarCampos

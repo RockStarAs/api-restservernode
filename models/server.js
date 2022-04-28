@@ -9,13 +9,14 @@ class Server {
         this.port = process.env.PORT;
         
         this.usuariosPath = '/api/usuarios';
-        //Conectar a la base de datos
+        this.authPath = '/api/auth';
+        //*Conectar a la base de datos
         this.conectarDb();
 
-        //Middlewares
+        //*Middlewares
         this.middleware();
     
-        //Rutas de la aplicación
+        //*Rutas de la aplicación
         this.routes();
     }
 
@@ -24,19 +25,19 @@ class Server {
     }
 
     middleware(){
-        //CORS
+        //*CORS
         this.app.use( cors() );
 
-        //Parseo y lectura del body (POSTS parametros)
+        //*Parseo y lectura del body (POSTS parametros)
         this.app.use( express.json() );
 
-        //Directorio público
+        //*Directorio público
         this.app.use( express.static('public') );
 
     }
 
     routes(){
-
+        this.app.use(this.authPath, require('../routes/auth.route'));
         this.app.use(this.usuariosPath, require('../routes/usuarios.route'));
     }
 
