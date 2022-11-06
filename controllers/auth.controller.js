@@ -86,7 +86,23 @@ const googleSingIn = async(req = request , res = response) => {
     }
 }
 
+const verificaToken = async(req = request , res = response)=>{
+    try{
+        const nuevoToken = await generarJWT(req.usuarioAuth._id);
+        res.json({
+            usuario: req.usuarioAuth,
+            token: nuevoToken
+        });
+    }catch(error){
+        return res.status(500).json({
+            msg: 'Error procesando el token',
+            error
+        });
+    }
+}
+
 module.exports = {
     login,
-    googleSingIn
+    googleSingIn,
+    verificaToken
 }
