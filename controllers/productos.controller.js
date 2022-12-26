@@ -6,7 +6,7 @@ const listarProductos = async(req = request, res = response)=>{
     try{
         //? Desde - Paginacion 
         //?  0   -   (10 x defecto)
-        let { desde =  0, pag = 5 } = req.query; //?Para los que traen en la URL
+        let { desde =  0, pag = 20 } = req.query; //?Para los que traen en la URL
         const query = { estado : true};
 
         const [productosActivos,totalProductos] = await Promise.all([
